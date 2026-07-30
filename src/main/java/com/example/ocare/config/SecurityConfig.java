@@ -39,7 +39,14 @@ public class SecurityConfig {
                     .accessDeniedHandler(accessDeniedHandler)
             )
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/v1/auth/**").permitAll()
+                    // 인증 이전 단계이거나(가입/로그인), 액세스 토큰이 만료된 상태에서
+                    // 호출해야 하는(재발급) 경로만 열어 둔다.
+                    // 로그아웃은 누구의 세션을 끊을지 알아야 하므로 인증이 필요하다.
+                    .requestMatchers(
+                            "/api/v1/auth/signup",
+                            "/api/v1/auth/login",
+                            "/api/v1/auth/refresh"
+                    ).permitAll()
                     .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
