@@ -54,7 +54,14 @@ public enum ErrorCode {
     /**
      * 이미 사용 중인 닉네임으로 가입을 시도한 경우.
      */
-    MEMBER_NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다.");
+    MEMBER_NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
+
+    // --- 인증 ---
+
+    /**
+     * 로그인 실패.
+     */
+    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

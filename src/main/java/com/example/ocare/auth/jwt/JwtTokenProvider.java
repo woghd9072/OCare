@@ -95,4 +95,11 @@ public class JwtTokenProvider {
     public Duration getRefreshTokenValidity() {
         return refreshTokenValidity;
     }
+
+    /**
+     * 액세스 토큰 유효기간. 응답의 expiresIn 값으로 사용한다.
+     */
+    public Duration getAccessTokenValidity() {
+        return accessTokenValidity;
+    }
 }
