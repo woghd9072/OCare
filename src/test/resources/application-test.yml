@@ -2,7 +2,7 @@
 # 개발 데이터가 남아 있으면 집계 정확도 테스트(골든값 비교)가 오염되기 때문이다.
 spring:
   datasource:
-    url: ${TEST_MYSQL_URL:jdbc:mysql://localhost:3306/oncare_test?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&rewriteBatchedStatements=true}
+    url: ${TEST_MYSQL_URL:jdbc:mysql://localhost:3306/ocare_test?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&rewriteBatchedStatements=true}
     username: ${TEST_MYSQL_USERNAME:root}
     password: ${TEST_MYSQL_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver

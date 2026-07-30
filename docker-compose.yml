@@ -3,21 +3,21 @@ services:
   # 컨테이너 타임존을 Asia/Seoul 로 고정한다.
   mysql:
     image: mysql:8.0
-    container_name: oncare-mysql
+    container_name: ocare-mysql
     ports:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: oncare
+      MYSQL_DATABASE: ocare
       TZ: Asia/Seoul
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --default-time-zone=+09:00
     volumes:
-      # 테스트 전용 스키마(oncare_test)를 최초 기동 시 함께 생성한다
+      # 테스트 전용 스키마(ocare_test)를 최초 기동 시 함께 생성한다
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-      - oncare-mysql-data:/var/lib/mysql
+      - ocare-mysql-data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 5s
@@ -28,7 +28,7 @@ services:
   # 애플리케이션은 db 0, 테스트는 db 1 을 사용해 데이터가 섞이지 않게 한다.
   redis:
     image: redis:7-alpine
-    container_name: oncare-redis
+    container_name: ocare-redis
     ports:
       - "6379:6379"
     healthcheck:
@@ -38,4 +38,4 @@ services:
       retries: 10
 
 volumes:
-  oncare-mysql-data:
+  ocare-mysql-data:

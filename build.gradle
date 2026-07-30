@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-description = 'Oncare Spring Boot project with JPA, MySQL, and Redis'
+description = 'OCare Spring Boot project with JPA, MySQL, and Redis'
 
 java {
 	toolchain {
