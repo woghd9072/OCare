@@ -41,7 +41,20 @@ public enum ErrorCode {
     /**
      * 서버 내부 오류. 예상하지 못한 예외를 클라이언트에 노출할 때 사용한다.
      */
-    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");
+    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다."),
+
+    // --- 회원 ---
+
+    /**
+     * 이미 가입된 이메일로 다시 가입을 시도한 경우.
+     * 요청 값 자체는 정상이고 현재 상태와 충돌하는 것이므로 409 를 쓴다.
+     */
+    MEMBER_EMAIL_DUPLICATED(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
+
+    /**
+     * 이미 사용 중인 닉네임으로 가입을 시도한 경우.
+     */
+    MEMBER_NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
