@@ -53,6 +53,12 @@ spring:
     time-zone: Asia/Seoul
     default-property-inclusion: non_null
 
+jwt:
+  secret: ${JWT_SECRET:ocare-local-development-secret-key-do-not-use-in-production}
+  # 액세스 토큰은 탈취 시 피해를 줄이기 위해 짧게 두고, 재발급으로 이어간다.
+  access-token-validity: 30m
+  refresh-token-validity: 14d
+
 logging:
   level:
     org.hibernate.SQL: debug
