@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * JWT 발급과 검증을 담당한다.
@@ -45,6 +46,11 @@ public class JwtTokenProvider {
     private String createToken(Long memberId, TokenType tokenType, Duration validity) {
         Instant now = Instant.now();
         return Jwts.builder()
+                // JWT 의 iat/exp 는 초 단위라, 같은 회원이 같은 초에 발급받으면
+                // 나머지 클레임이 동일해 완전히 같은 토큰이 만들어진다.
+                // 그러면 재발급해도 이전 리프레시 토큰과 값이 같아 토큰 회전이 무력화된다.
+                // 매번 다른 식별자를 넣어 토큰이 항상 유일하도록 보장한다.
+                .id(UUID.randomUUID().toString())
                 .subject(String.valueOf(memberId))
                 .claim(CLAIM_TOKEN_TYPE, tokenType.name())
                 .issuedAt(Date.from(now))
