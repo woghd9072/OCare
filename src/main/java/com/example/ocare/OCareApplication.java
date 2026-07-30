@@ -1,13 +1,13 @@
-package com.example.oncare;
+package com.example.ocare;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class OncareApplication {
+public class OCareApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(OncareApplication.class, args);
+		SpringApplication.run(OCareApplication.class, args);
 	}
 
 }
