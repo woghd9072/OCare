@@ -19,6 +19,18 @@ spring:
       # database 0 = 애플리케이션용. 테스트는 1번을 사용해 데이터가 섞이지 않게 한다.
       database: 0
 
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # 이미 테이블이 존재하는 DB 에 처음 적용될 때 기준선을 잡아 준다.
+    baseline-on-migrate: true
+    baseline-version: 0
+    # 적용 완료된 마이그레이션 파일이 나중에 수정되면 기동을 실패시킨다.
+    # 파일을 고쳐도 이미 반영된 DB 는 바뀌지 않는다.
+    validate-on-migrate: true
+    # 운영 데이터를 통째로 지우는 명령이므로 기본은 차단한다. 테스트 프로파일에서만 연다.
+    clean-disabled: true
+
   jpa:
     hibernate:
       # 스키마의 소유권은 Flyway 마이그레이션에 있다.

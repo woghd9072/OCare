@@ -36,7 +36,9 @@ dependencies {
 	runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
 	runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
 
-	// DDL 을 버전 관리하고 테이블/컬럼 COMMENT 를 형상에 남기기 위해 Flyway 사용
+	// DDL 을 버전 관리하고 테이블/컬럼 COMMENT 를 형상에 남기기 위해 Flyway 사용.
+	// Spring Boot 4 는 자동설정이 모듈별로 분리되어 있어 spring-boot-flyway 를 함께 넣어야 기동 시 마이그레이션이 실행된다. (flyway-core 만 있으면 spring.flyway.* 설정이 무시된다)
+	implementation 'org.springframework.boot:spring-boot-flyway'
 	implementation 'org.flywaydb:flyway-core'
 	runtimeOnly 'org.flywaydb:flyway-mysql'
 
