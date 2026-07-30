@@ -4,8 +4,11 @@ import com.example.ocare.common.response.ApiError;
 import com.example.ocare.common.response.ApiResponse;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -98,11 +101,28 @@ public class GlobalExceptionHandler {
     /**
      * 위에서 처리되지 않은 모든 예외.
      *
-     * <p>원인 파악을 위해 스택 트레이스를 남기되, 응답에는 내부 정보가 새지 않도록
+     * <p>Spring MVC 가 상태 코드를 이미 정해 둔 예외({@link ErrorResponse} 구현체)는 그 상태를 존중한다.
+     * 존재하지 않는 경로 요청({@code NoResourceFoundException}), 허용되지 않은 메서드,
+     * 지원하지 않는 미디어 타입이 여기에 해당한다.
+     * 이 분기가 없으면 404 여야 할 요청이 500 으로 응답되어, 클라이언트가 서버 장애로 오해하고
+     * 재시도하게 된다.
+     *
+     * <p>그 외의 예외는 원인 파악을 위해 스택 트레이스를 남기되, 응답에는 내부 정보가 새지 않도록
      * {@link ErrorCode#INTERNAL_ERROR} 의 기본 메시지만 내려준다.
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
+        if (e instanceof ErrorResponse errorResponse && !errorResponse.getStatusCode().is5xxServerError()) {
+            HttpStatusCode statusCode = errorResponse.getStatusCode();
+            ErrorCode errorCode = statusCode.value() == HttpStatus.NOT_FOUND.value()
+                    ? ErrorCode.NOT_FOUND
+                    : ErrorCode.INVALID_REQUEST;
+            log.warn("요청을 처리할 수 없음: status={}, message={}", statusCode.value(), e.getMessage());
+
+            return ResponseEntity.status(statusCode)
+                    .body(ApiResponse.fail(ApiError.of(errorCode.code(), errorCode.getMessage())));
+        }
+
         log.error("처리되지 않은 예외 발생", e);
 
         return toResponse(ErrorCode.INTERNAL_ERROR, ErrorCode.INTERNAL_ERROR.getMessage(), null);
