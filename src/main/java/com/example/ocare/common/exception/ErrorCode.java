@@ -61,7 +61,20 @@ public enum ErrorCode {
     /**
      * 로그인 실패.
      */
-    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다.");
+    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."),
+
+    // --- 레코드키 ---
+
+    /**
+     * 이미 등록된 레코드키를 다시 등록하려는 경우.
+     * 다른 회원이 이미 등록한 경우도 포함되며, 어느 쪽인지는 구분해 알려주지 않는다.
+     */
+    RECORD_KEY_DUPLICATED(HttpStatus.CONFLICT, "이미 등록된 레코드키입니다."),
+
+    /**
+     * 등록되지 않은 레코드키로 요청한 경우.
+     */
+    RECORD_KEY_NOT_FOUND(HttpStatus.NOT_FOUND, "등록되지 않은 레코드키입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
