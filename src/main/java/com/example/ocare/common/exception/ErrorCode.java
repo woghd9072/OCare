@@ -74,7 +74,16 @@ public enum ErrorCode {
     /**
      * 등록되지 않은 레코드키로 요청한 경우.
      */
-    RECORD_KEY_NOT_FOUND(HttpStatus.NOT_FOUND, "등록되지 않은 레코드키입니다.");
+    RECORD_KEY_NOT_FOUND(HttpStatus.NOT_FOUND, "등록되지 않은 레코드키입니다."),
+
+    /**
+     * 다른 회원이 등록한 레코드키에 접근하려는 경우.
+     *
+     * <p>404 로 감추지 않고 403 으로 구분해 응답한다.
+     * 등록 API 가 이미 중복 여부(409)로 키의 존재를 드러내므로 감춰 봐야 얻는 것이 없고,
+     * 사용자 입장에서는 "없는 키"와 "내 키가 아닌 키"를 구분해야 조치를 취할 수 있기 때문이다.
+     */
+    RECORD_KEY_FORBIDDEN(HttpStatus.FORBIDDEN, "본인이 등록한 레코드키가 아닙니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

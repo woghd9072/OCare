@@ -67,6 +67,26 @@ public class RecordKeyService {
     }
 
     /**
+     * 요청자가 소유한 레코드키를 조회한다. 소유자가 아니면 거부한다.
+     *
+     * <p>수집과 조회 API 가 공통으로 사용된다. 두 API 모두 레코드키를 요청 값으로 받는데,
+     * 이 검사가 없으면 남의 레코드키를 넣어 타인의 건강 데이터를 저장하거나 열람할 수 있다.
+     * 인증만으로는 막을 수 없고, "인증된 사람이 그 데이터의 주인인지"까지 확인해야 한다.
+     *
+     * <p>엔티티를 그대로 반환해 호출부가 출처나 활성 여부 같은 부가 정보를 함께 쓸 수 있게 한다.
+     */
+    @Transactional(readOnly = true)
+    public RecordKey getOwnedRecordKey(Long memberId, String recordKey) {
+        RecordKey found = recordKeyRepository.findByRecordKey(recordKey)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECORD_KEY_NOT_FOUND));
+
+        if (!found.isOwnedBy(memberId)) {
+            throw new BusinessException(ErrorCode.RECORD_KEY_FORBIDDEN);
+        }
+        return found;
+    }
+
+    /**
      * 단말이 보낸 출처 표기를 열거형으로 바꾼다.
      *
      * <p>Bean Validation 으로는 "알려진 출처인지"를 판단할 수 없어 여기서 확인한다.
