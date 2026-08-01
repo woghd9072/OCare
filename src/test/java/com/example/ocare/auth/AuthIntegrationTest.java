@@ -7,6 +7,7 @@ import com.example.ocare.member.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import com.example.ocare.support.DatabaseCleaner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -39,6 +40,9 @@ class AuthIntegrationTest {
     private static final String PROTECTED_URL = "/api/v1/health-data/daily";
 
     @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -57,7 +61,7 @@ class AuthIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        memberRepository.deleteAll();
+        databaseCleaner.clean();
         Member member = memberRepository.save(
                 Member.create("인증테스트", "authtester", EMAIL, passwordEncoder.encode(PASSWORD))
         );
