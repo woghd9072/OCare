@@ -2,13 +2,12 @@ package com.example.ocare.health.payload;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+
+import java.math.BigDecimal;
 
 /**
  * 측정 구간 하나.
- *
- * <p>{@code steps} 를 {@link String} 으로 받는 이유는 출처마다 JSON 타입이 다르기 때문이다.
- * 삼성은 숫자 {@code 54}, 애플은 문자열 {@code "688.5509846105425"} 로 보낸다.
- * 둘 다 받으려면 별도 역직렬화가 필요하며, 이는 다음 단계에서 처리한다.
  */
 public record HealthPayloadEntry(
 
@@ -16,11 +15,15 @@ public record HealthPayloadEntry(
         @Valid
         HealthPayloadPeriod period,
 
-        String steps,
+        @NotNull(message = "걸음수는 필수입니다.")
+        @PositiveOrZero(message = "걸음수는 0 이상이어야 합니다.")
+        BigDecimal steps,
 
+        @NotNull(message = "이동거리는 필수입니다.")
         @Valid
         HealthPayloadMeasure distance,
 
+        @NotNull(message = "소모 칼로리는 필수입니다.")
         @Valid
         HealthPayloadMeasure calories
 ) {
@@ -45,8 +48,16 @@ public record HealthPayloadEntry(
      * 값과 단위를 함께 담는 측정치.
      *
      * @param value 측정값. 애플의 칼로리는 항상 0 이다
-     * @param unit  단위. 실제 데이터에서는 거리 km, 칼로리 kcal 만 확인된다
+     * @param unit  단위. 실제 데이터에서는 거리 km, 칼로리 kcal 만 확인된다.
+     *              단위를 무시하고 값만 쓰면 m 로 보내는 단말이 생겼을 때 1000배 오차가 발생하므로 함께 받는다
      */
-    public record HealthPayloadMeasure(Double value, String unit) {
+    public record HealthPayloadMeasure(
+            @NotNull(message = "측정값은 필수입니다.")
+            @PositiveOrZero(message = "측정값은 0 이상이어야 합니다.")
+            BigDecimal value,
+
+            @NotNull(message = "측정 단위는 필수입니다.")
+            String unit
+    ) {
     }
 }
