@@ -5,6 +5,7 @@ import com.example.ocare.member.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import com.example.ocare.support.DatabaseCleaner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -33,6 +34,9 @@ class MemberSignupIntegrationTest {
     private static final String SIGNUP_URL = "/api/v1/auth/signup";
 
     @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -43,7 +47,7 @@ class MemberSignupIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        memberRepository.deleteAll();
+        databaseCleaner.clean();
     }
 
     @Test

@@ -4,6 +4,7 @@ import com.example.ocare.health.HealthSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import com.example.ocare.support.DatabaseCleaner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -28,6 +29,9 @@ class HealthEntityMappingTest {
     private static final String RECORD_KEY = "mapping-test-key";
 
     @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -38,10 +42,7 @@ class HealthEntityMappingTest {
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.update("DELETE FROM health_records");
-        jdbcTemplate.update("DELETE FROM health_uploads");
-        jdbcTemplate.update("DELETE FROM record_keys");
-        jdbcTemplate.update("DELETE FROM members");
+        databaseCleaner.clean();
         jdbcTemplate.update("INSERT INTO members (id, name, nickname, email, password, created_at, updated_at) "
                 + "VALUES (1, '테스트', 'mapper', 'mapper@example.com', 'x', NOW(6), NOW(6))");
         jdbcTemplate.update("INSERT INTO record_keys (member_id, record_key, source_name, status, created_at, updated_at) "

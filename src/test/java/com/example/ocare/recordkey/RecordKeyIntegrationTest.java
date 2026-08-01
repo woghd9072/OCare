@@ -10,6 +10,7 @@ import com.example.ocare.recordkey.service.RecordKeyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import com.example.ocare.support.DatabaseCleaner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -45,6 +46,9 @@ class RecordKeyIntegrationTest {
     private static final String APPLE_KEY = "7b012e6e-ba2b-49c7-bc2e-473b7b58e72e";
 
     @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -66,8 +70,7 @@ class RecordKeyIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        recordKeyRepository.deleteAll();
-        memberRepository.deleteAll();
+        databaseCleaner.clean();
 
         ownerId = createMember("주인", "owner", "owner@example.com");
         strangerId = createMember("타인", "stranger", "stranger@example.com");
