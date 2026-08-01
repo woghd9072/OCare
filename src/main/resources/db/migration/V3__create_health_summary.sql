@@ -7,9 +7,12 @@
 -- 수집 시점에 영향받은 날짜만 UPSERT 로 갱신한다.
 --
 -- 합계 컬럼을 DECIMAL 로 두는 이유:
--- 원본 데이터에는 0.29999998, 9.759994 처럼 float32 로 계산된 값이 그대로 들어 있다.
--- 이를 부동소수로 1,500건 누적하면 오차가 눈에 보이는 수준으로 커진다.
--- 저장과 집계는 DECIMAL 로 수행하고, 응답에서만 실수로 변환한다.
+-- 원본 데이터에는 0.29999998, 9.759994 처럼 float32 로 계산된 값이 그대로 들어 있고,
+-- 애플 데이터의 걸음수는 688.5509846105425 같은 소수다.
+-- 부동소수로 누적하면 원본 합계와 미세하게 어긋나는데, 조회 결과가 원본과 일치해야 하므로
+-- 저장과 집계는 DECIMAL 로 수행하고 응답에서만 실수로 변환한다.
+-- 실측 예: INPUT_DATA4 의 2024-11-16 정확한 합은 12449.99999999999997 로,
+-- 합산 후 반올림하면 12450 이지만 구간별로 반올림하면 12449 가 된다.
 -- ============================================================================
 
 CREATE TABLE health_daily_summaries
@@ -18,7 +21,7 @@ CREATE TABLE health_daily_summaries
     record_key         VARCHAR(64)    NOT NULL COMMENT '사용자 구분 키',
     summary_date       DATE           NOT NULL COMMENT '집계 기준일(KST). health_records.measured_date 와 같은 기준이다',
 
-    steps              INT            NOT NULL COMMENT '해당 일자의 총 걸음수. 소수 걸음을 모두 더한 뒤 마지막에 한 번만 반올림한다. 구간별로 반올림하면 하루 수천 걸음의 오차가 발생한다',
+    steps              INT            NOT NULL COMMENT '해당 일자의 총 걸음수. 소수 걸음을 모두 더한 뒤 마지막에 한 번만 반올림한다. 구간별로 반올림하면 원본 합계와 어긋난다(실측 기준 하루 최대 4걸음)',
     calories           DECIMAL(12, 4) NOT NULL COMMENT '해당 일자의 총 소모 칼로리(kcal)',
     distance_km        DECIMAL(12, 6) NOT NULL COMMENT '해당 일자의 총 이동거리(km)',
 
