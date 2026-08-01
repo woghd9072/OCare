@@ -1,6 +1,7 @@
 package com.example.ocare.health.payload;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 /**
  * 단말이 보낸 시각을 해석한 결과.
@@ -13,5 +14,12 @@ public record ParsedTime(Instant instant, String sourceOffset) {
 
     public boolean hasExplicitOffset() {
         return sourceOffset != null;
+    }
+
+    /**
+     * 이 시각이 속하는 집계 기준일(KST).
+     */
+    public LocalDate measuredDate() {
+        return HealthTimeParser.measuredDate(instant);
     }
 }

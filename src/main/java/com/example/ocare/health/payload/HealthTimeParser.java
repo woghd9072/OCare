@@ -3,6 +3,8 @@ package com.example.ocare.health.payload;
 import com.example.ocare.common.exception.BusinessException;
 import com.example.ocare.common.exception.ErrorCode;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -82,6 +84,24 @@ public final class HealthTimeParser {
         }
 
         throw new BusinessException(ErrorCode.INVALID_REQUEST, "해석할 수 없는 시각 표기입니다: " + value);
+    }
+
+    /**
+     * 집계 기준일을 구한다.
+     *
+     * <p>UTC 시각을 KST 로 환산한 날짜다. 일별/월별 집계는 전부 이 값을 기준으로 하며,
+     * 이렇게 해야 표기가 다른 두 출처의 데이터가 같은 축에서 합산된다.
+     *
+     * <p>UTC 날짜를 그대로 쓰면 안 된다. 애플의 {@code 2024-11-14T21:20:00+0000} 은
+     * UTC 로는 14일이지만 사용자에게는 15일 오전 6시 20분의 활동이다.
+     * UTC 기준으로 집계하면 매일 오전 0~9시 활동이 전날로 밀린다.
+     *
+     * <p>구간의 시작 시각을 기준으로 삼는다. 입력 데이터의 구간은 10분 단위로 정렬되어 있어
+     * 자정을 걸치는 구간이 없으므로, 시작과 종료 중 어느 쪽을 써도 같은 날짜가 나온다.
+     * 시작을 쓰는 편이 "활동이 시작된 날" 이라는 의미가 분명하다.
+     */
+    public static LocalDate measuredDate(Instant instant) {
+        return instant.atZone(DEVICE_ZONE).toLocalDate();
     }
 
     /**
