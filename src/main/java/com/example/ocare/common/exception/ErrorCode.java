@@ -83,7 +83,16 @@ public enum ErrorCode {
      * 등록 API 가 이미 중복 여부(409)로 키의 존재를 드러내므로 감춰 봐야 얻는 것이 없고,
      * 사용자 입장에서는 "없는 키"와 "내 키가 아닌 키"를 구분해야 조치를 취할 수 있기 때문이다.
      */
-    RECORD_KEY_FORBIDDEN(HttpStatus.FORBIDDEN, "본인이 등록한 레코드키가 아닙니다.");
+    RECORD_KEY_FORBIDDEN(HttpStatus.FORBIDDEN, "본인이 등록한 레코드키가 아닙니다."),
+
+    /**
+     * 수집이 중단된 레코드키로 데이터를 보낸 경우.
+     *
+     * <p>단말 교체 등으로 비활성화된 키다. 조용히 저장하면 사용자가 더 이상 쓰지 않는 단말의
+     * 데이터가 계속 쌓이므로 거부하되, 400 이 아니라 409 로 응답해
+     * "요청이 잘못된 것이 아니라 현재 상태 때문" 임을 구분해 준다.
+     */
+    RECORD_KEY_INACTIVE(HttpStatus.CONFLICT, "수집이 중단된 레코드키입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
