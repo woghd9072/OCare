@@ -40,6 +40,7 @@ public class HealthQueryService {
     private final RecordKeyService recordKeyService;
     private final HealthDailySummaryRepository dailySummaryRepository;
     private final HealthMonthlySummaryRepository monthlySummaryRepository;
+    private final HealthSummaryCache summaryCache;
 
     /**
      * 일별 활동 집계를 조회한다.
@@ -50,8 +51,23 @@ public class HealthQueryService {
     @Transactional(readOnly = true)
     public DailySummaryResult findDaily(Long memberId, String recordKey, LocalDate from, LocalDate to) {
         validatePeriod(from, to);
+
+        // 소유권 확인은 캐시보다 먼저 한다. 캐시 적중 시에도 건너뛰면
+        // 남의 레코드키로 캐시된 결과를 그대로 받아볼 수 있다.
         recordKeyService.getOwnedRecordKey(memberId, recordKey);
 
+        String fromKey = from.toString();
+        String toKey = to.toString();
+
+        return summaryCache.getDaily(recordKey, fromKey, toKey)
+                .orElseGet(() -> {
+                    DailySummaryResult result = loadDaily(recordKey, from, to);
+                    summaryCache.putDaily(recordKey, fromKey, toKey, result);
+                    return result;
+                });
+    }
+
+    private DailySummaryResult loadDaily(String recordKey, LocalDate from, LocalDate to) {
         List<DailySummaryResponse> summaries = dailySummaryRepository
                 .findAllByRecordKeyAndSummaryDateBetweenOrderBySummaryDateAsc(recordKey, from, to)
                 .stream()
@@ -72,14 +88,25 @@ public class HealthQueryService {
         validatePeriod(from, to);
         recordKeyService.getOwnedRecordKey(memberId, recordKey);
 
+        String fromKey = from.toString();
+        String toKey = to.toString();
+
+        return summaryCache.getMonthly(recordKey, fromKey, toKey)
+                .orElseGet(() -> {
+                    MonthlySummaryResult result = loadMonthly(recordKey, fromKey, toKey);
+                    summaryCache.putMonthly(recordKey, fromKey, toKey, result);
+                    return result;
+                });
+    }
+
+    private MonthlySummaryResult loadMonthly(String recordKey, String from, String to) {
         List<MonthlySummaryResponse> summaries = monthlySummaryRepository
-                .findAllByRecordKeyAndSummaryMonthBetweenOrderBySummaryMonthAsc(
-                        recordKey, from.toString(), to.toString())
+                .findAllByRecordKeyAndSummaryMonthBetweenOrderBySummaryMonthAsc(recordKey, from, to)
                 .stream()
                 .map(MonthlySummaryResponse::from)
                 .toList();
 
-        return MonthlySummaryResult.of(recordKey, from.toString(), to.toString(), summaries);
+        return MonthlySummaryResult.of(recordKey, from, to, summaries);
     }
 
     private void validatePeriod(YearMonth from, YearMonth to) {
