@@ -9,6 +9,7 @@ import com.example.ocare.health.payload.HealthPayload;
 import com.example.ocare.health.payload.HealthPayloadNormalizer;
 import com.example.ocare.health.payload.NormalizedHealthEntry;
 import com.example.ocare.health.payload.NormalizedHealthPayload;
+import com.example.ocare.health.summary.HealthSummaryService;
 import com.example.ocare.recordkey.entity.RecordKey;
 import com.example.ocare.recordkey.service.RecordKeyService;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,7 @@ public class HealthIngestService {
     private final HealthUploadRepository uploadRepository;
     private final HealthRecordBatchWriter batchWriter;
     private final IdempotencyStore idempotencyStore;
+    private final HealthSummaryService summaryService;
 
     @Transactional
     public HealthIngestResponse ingest(Long memberId, HealthPayload rawPayload) {
@@ -105,6 +107,8 @@ public class HealthIngestService {
         int duplicated = payload.entryCount() - saved;
 
         upload.complete(saved, duplicated, 0);
+
+        summaryService.refresh(payload.recordKey(), affectedDates);
 
         log.info("수집 완료: uploadId={}, recordKey={}, received={}, saved={}, duplicated={}",
                 upload.getId(), payload.recordKey(), payload.entryCount(), saved, duplicated);
