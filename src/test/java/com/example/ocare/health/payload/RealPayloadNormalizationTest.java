@@ -1,20 +1,21 @@
 package com.example.ocare.health.payload;
 
 import com.example.ocare.health.HealthSource;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
-import tools.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -170,10 +171,10 @@ class RealPayloadNormalizationTest {
 
     private void assertDailyTotal(NormalizedHealthPayload payload, String date,
                                   String steps, String calories, String distanceKm, int entryCount) {
-        Map<LocalDate, java.util.List<NormalizedHealthEntry>> byDate = payload.entries().stream()
+        Map<LocalDate, List<NormalizedHealthEntry>> byDate = payload.entries().stream()
                 .collect(Collectors.groupingBy(NormalizedHealthEntry::measuredDate));
 
-        java.util.List<NormalizedHealthEntry> entries = byDate.get(LocalDate.parse(date));
+        List<NormalizedHealthEntry> entries = byDate.get(LocalDate.parse(date));
         assertThat(entries).as("%s 의 측정 구간", date).hasSize(entryCount);
 
         assertThat(sum(entries, NormalizedHealthEntry::steps)).as("%s 걸음수", date)
@@ -187,14 +188,14 @@ class RealPayloadNormalizationTest {
     private void assertDateRange(NormalizedHealthPayload payload, String first, String last, int dayCount) {
         var dates = payload.entries().stream()
                 .map(NormalizedHealthEntry::measuredDate)
-                .collect(Collectors.toCollection(java.util.TreeSet::new));
+                .collect(Collectors.toCollection(TreeSet::new));
 
         assertThat(dates.first()).isEqualTo(LocalDate.parse(first));
         assertThat(dates.last()).isEqualTo(LocalDate.parse(last));
         assertThat(dates).hasSize(dayCount);
     }
 
-    private BigDecimal sum(java.util.List<NormalizedHealthEntry> entries,
+    private BigDecimal sum(List<NormalizedHealthEntry> entries,
                            Function<NormalizedHealthEntry, BigDecimal> extractor) {
         return entries.stream().map(extractor).reduce(BigDecimal.ZERO, BigDecimal::add);
     }

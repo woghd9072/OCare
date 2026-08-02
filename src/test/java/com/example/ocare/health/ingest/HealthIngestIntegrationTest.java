@@ -2,10 +2,14 @@ package com.example.ocare.health.ingest;
 
 import com.example.ocare.member.entity.Member;
 import com.example.ocare.member.repository.MemberRepository;
+import com.example.ocare.support.DatabaseCleaner;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import com.example.ocare.support.DatabaseCleaner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -18,11 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.util.Set;
+import org.springframework.test.web.servlet.RequestBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -229,7 +229,7 @@ class HealthIngestIntegrationTest {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM health_uploads", Integer.class);
     }
 
-    private org.springframework.test.web.servlet.RequestBuilder ingest(String token, String fileName)
+    private RequestBuilder ingest(String token, String fileName)
             throws IOException {
         return post(URL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)

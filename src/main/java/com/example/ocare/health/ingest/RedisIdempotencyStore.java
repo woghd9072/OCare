@@ -1,7 +1,7 @@
 package com.example.ocare.health.ingest;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.connection.RedisStringCommands.SetOption;
+import org.springframework.data.redis.connection.SetCondition;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.types.Expiration;
@@ -38,8 +38,9 @@ public class RedisIdempotencyStore implements IdempotencyStore {
 
         List<Object> results = redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             for (String key : ordered) {
+                // SET key value NX EX ttl : "없을 때만 쓰기" 를 한 번의 명령으로 처리한다.
                 connection.stringCommands().set(
-                        redisKey(key), MARKER, Expiration.from(ttl), SetOption.ifAbsent());
+                        redisKey(key), MARKER, SetCondition.ifAbsent(), Expiration.from(ttl));
             }
             return null;
         });

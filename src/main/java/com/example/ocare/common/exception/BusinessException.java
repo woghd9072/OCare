@@ -15,6 +15,12 @@ import lombok.Getter;
 @Getter
 public class BusinessException extends RuntimeException {
 
+    /**
+     * 예외는 서블릿 컨테이너 등에서 직렬화될 수 있어 명시해 둔다.
+     * 값을 두지 않으면 클래스가 조금만 바뀌어도 자동 생성된 값이 달라진다.
+     */
+    private static final long serialVersionUID = 1L;
+
     private final ErrorCode errorCode;
 
     public BusinessException(ErrorCode errorCode) {

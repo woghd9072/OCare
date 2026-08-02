@@ -4,10 +4,10 @@ import com.example.ocare.auth.jwt.JwtTokenProvider;
 import com.example.ocare.auth.token.RefreshTokenStore;
 import com.example.ocare.member.entity.Member;
 import com.example.ocare.member.repository.MemberRepository;
+import com.example.ocare.support.DatabaseCleaner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import com.example.ocare.support.DatabaseCleaner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.RequestBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -236,7 +237,7 @@ class AuthIntegrationTest {
                 .andReturn();
     }
 
-    private org.springframework.test.web.servlet.RequestBuilder login(String email, String password) {
+    private RequestBuilder login(String email, String password) {
         return post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
@@ -244,7 +245,7 @@ class AuthIntegrationTest {
                         """.formatted(email, password));
     }
 
-    private org.springframework.test.web.servlet.RequestBuilder refresh(String refreshToken) {
+    private RequestBuilder refresh(String refreshToken) {
         return post("/api/v1/auth/refresh")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""

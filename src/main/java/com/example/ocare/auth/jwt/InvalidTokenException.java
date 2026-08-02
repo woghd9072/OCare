@@ -12,6 +12,8 @@ import com.example.ocare.common.exception.ErrorCode;
  */
 public class InvalidTokenException extends BusinessException {
 
+    private static final long serialVersionUID = 1L;
+
     public InvalidTokenException(String message) {
         super(ErrorCode.UNAUTHORIZED, message);
     }

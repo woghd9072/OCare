@@ -1,10 +1,10 @@
 package com.example.ocare.health.payload;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,7 +49,7 @@ class MeasuredDateTest {
         // 올바른 기준(KST)
         assertThat(HealthTimeParser.measuredDate(instant)).isEqualTo(LocalDate.of(2024, 11, 15));
         // UTC 를 그대로 썼다면 하루 전으로 귀속된다
-        assertThat(instant.atZone(java.time.ZoneOffset.UTC).toLocalDate())
+        assertThat(instant.atZone(ZoneOffset.UTC).toLocalDate())
                 .isEqualTo(LocalDate.of(2024, 11, 14));
     }
 

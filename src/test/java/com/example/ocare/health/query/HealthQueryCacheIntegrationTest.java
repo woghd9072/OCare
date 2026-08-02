@@ -3,6 +3,8 @@ package com.example.ocare.health.query;
 import com.example.ocare.member.entity.Member;
 import com.example.ocare.member.repository.MemberRepository;
 import com.example.ocare.support.DatabaseCleaner;
+import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,9 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Set;
+import org.springframework.test.web.servlet.RequestBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -203,7 +203,7 @@ class HealthQueryCacheIntegrationTest {
         }
     }
 
-    private org.springframework.test.web.servlet.RequestBuilder daily(String token, String from, String to) {
+    private RequestBuilder daily(String token, String from, String to) {
         return get(DAILY_URL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .param("recordKey", SAMSUNG_KEY)

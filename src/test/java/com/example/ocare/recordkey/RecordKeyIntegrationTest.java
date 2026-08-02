@@ -7,10 +7,10 @@ import com.example.ocare.member.repository.MemberRepository;
 import com.example.ocare.recordkey.entity.RecordKey;
 import com.example.ocare.recordkey.repository.RecordKeyRepository;
 import com.example.ocare.recordkey.service.RecordKeyService;
+import com.example.ocare.support.DatabaseCleaner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import com.example.ocare.support.DatabaseCleaner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.RequestBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -215,7 +216,7 @@ class RecordKeyIntegrationTest {
         return body.substring(start, body.indexOf('"', start));
     }
 
-    private org.springframework.test.web.servlet.RequestBuilder register(String token, String recordKey, String source) {
+    private RequestBuilder register(String token, String recordKey, String source) {
         return post(URL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)

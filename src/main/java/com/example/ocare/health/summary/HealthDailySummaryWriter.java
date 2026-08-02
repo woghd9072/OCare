@@ -1,14 +1,14 @@
 package com.example.ocare.health.summary;
 
 import com.example.ocare.health.HealthSource;
-import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 /**
  * 일별 집계를 다시 계산해 저장한다.
@@ -67,7 +67,7 @@ public class HealthDailySummaryWriter {
             return 0;
         }
         List<LocalDate> targets = List.copyOf(dates);
-        String placeholders = String.join(", ", java.util.Collections.nCopies(targets.size(), "?"));
+        String placeholders = String.join(", ", Collections.nCopies(targets.size(), "?"));
 
         List<Object> params = new ArrayList<>();
         params.add(HealthSource.APPLE_HEALTH.payloadName());

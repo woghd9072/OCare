@@ -3,9 +3,9 @@ package com.example.ocare.health.payload;
 import com.example.ocare.common.exception.BusinessException;
 import com.example.ocare.common.exception.ErrorCode;
 import com.example.ocare.health.HealthSource;
-import org.springframework.stereotype.Component;
-
+import java.time.Instant;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  * 단말이 보낸 페이로드를 저장 가능한 형태로 정규화한다.
@@ -90,7 +90,7 @@ public class HealthPayloadNormalizer {
      * 단말의 마지막 갱신 시각. 수집 이력에만 기록하는 부가 정보라, 없거나 해석할 수 없어도
      * 수집 자체를 실패시키지 않는다. 측정 데이터의 정확성과는 무관하기 때문이다.
      */
-    private java.time.Instant parseLastUpdate(String lastUpdate) {
+    private Instant parseLastUpdate(String lastUpdate) {
         if (lastUpdate == null || lastUpdate.isBlank()) {
             return null;
         }

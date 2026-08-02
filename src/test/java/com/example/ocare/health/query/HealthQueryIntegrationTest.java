@@ -3,6 +3,9 @@ package com.example.ocare.health.query;
 import com.example.ocare.member.entity.Member;
 import com.example.ocare.member.repository.MemberRepository;
 import com.example.ocare.support.DatabaseCleaner;
+import java.nio.charset.StandardCharsets;
+import java.util.Set;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,11 +16,10 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Set;
+import org.springframework.test.web.servlet.RequestBuilder;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -51,7 +53,7 @@ class HealthQueryIntegrationTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -166,7 +168,7 @@ class HealthQueryIntegrationTest {
         // 상한이 없으면 수 년치를 한 번에 요청해 응답이 지나치게 커진다
         mockMvc.perform(daily(ownerToken, SAMSUNG_KEY, "2024-01-01", "2025-06-30"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error.message").value(org.hamcrest.Matchers.containsString("366일")));
+                .andExpect(jsonPath("$.error.message").value(Matchers.containsString("366일")));
 
         mockMvc.perform(monthly(ownerToken, SAMSUNG_KEY, "2023-01", "2025-12"))
                 .andExpect(status().isBadRequest());
@@ -216,7 +218,7 @@ class HealthQueryIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
-    private org.springframework.test.web.servlet.RequestBuilder daily(String token, String recordKey,
+    private RequestBuilder daily(String token, String recordKey,
                                                                      String from, String to) {
         return get(DAILY_URL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
@@ -225,7 +227,7 @@ class HealthQueryIntegrationTest {
                 .param("to", to);
     }
 
-    private org.springframework.test.web.servlet.RequestBuilder monthly(String token, String recordKey,
+    private RequestBuilder monthly(String token, String recordKey,
                                                                        String from, String to) {
         return get(MONTHLY_URL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
