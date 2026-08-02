@@ -39,6 +39,14 @@ class AuthIntegrationTest {
     private static final String PASSWORD = "ocare1234";
     private static final String PROTECTED_URL = "/api/v1/health-data/daily";
 
+    /**
+     * 인증 통과 여부만 보고 싶을 때 사용하는, 매핑되지 않은 보호 경로.
+     *
+     * <p>실제 API 경로를 쓰면 그 API 의 파라미터 검증 결과에 따라 상태 코드가 달라져
+     * 인증과 무관한 이유로 테스트가 깨진다.
+     */
+    private static final String UNMAPPED_PROTECTED_URL = "/api/v1/health-data/no-such-endpoint";
+
     @Autowired
     private DatabaseCleaner databaseCleaner;
 
@@ -112,9 +120,8 @@ class AuthIntegrationTest {
     void accessWithValidToken() throws Exception {
         String accessToken = extract(login(), "accessToken");
 
-        // 아직 해당 경로에 컨트롤러가 없어 404 가 나오지만,
-        // 401 이 아니라는 것은 인증 단계를 통과했다는 뜻이다.
-        mockMvc.perform(get(PROTECTED_URL).header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+        // 매핑되지 않은 경로라 404 가 나오지만, 401 이 아니라는 것은 인증 단계를 통과했다는 뜻이다.
+        mockMvc.perform(get(UNMAPPED_PROTECTED_URL).header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isNotFound());
     }
 

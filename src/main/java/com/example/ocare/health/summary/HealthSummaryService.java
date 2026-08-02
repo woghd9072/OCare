@@ -1,9 +1,12 @@
 package com.example.ocare.health.summary;
 
+import com.example.ocare.health.query.HealthSummaryCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -24,6 +27,7 @@ public class HealthSummaryService {
 
     private final HealthDailySummaryWriter dailyWriter;
     private final HealthMonthlySummaryWriter monthlyWriter;
+    private final HealthSummaryCache summaryCache;
 
     /**
      * 일별 집계를 먼저 갱신하고, 그 결과로 월별 집계를 갱신한다.
@@ -46,7 +50,37 @@ public class HealthSummaryService {
         affectedDates.forEach(date -> affectedMonths.add(YearMonth.from(date)));
         int monthlyRows = monthlyWriter.upsert(recordKey, affectedMonths);
 
+        invalidateCacheAfterCommit(recordKey);
+
         log.info("집계 갱신: recordKey={}, 일자={}건, 월={}건 (영향 행 {}·{})",
                 recordKey, affectedDates.size(), affectedMonths.size(), dailyRows, monthlyRows);
+    }
+
+    /**
+     * 캐시 무효화를 트랜잭션 커밋 이후로 미룬다.
+     *
+     * <p>커밋 전에 무효화하면 다음 순서로 옛 값이 새 버전에 눌러앉는다.
+     * <ol>
+     *   <li>수집 트랜잭션이 캐시 버전을 올린다 (아직 커밋 전)</li>
+     *   <li>다른 요청이 새 버전으로 조회한다. 아직 커밋되지 않았으므로 DB 에서 <b>옛 값</b>을 읽는다</li>
+     *   <li>그 옛 값이 새 버전 키로 캐시된다</li>
+     *   <li>수집이 커밋된다. 하지만 캐시에는 이미 옛 값이 새 버전으로 들어가 있다</li>
+     * </ol>
+     * 이렇게 되면 다음 수집이 일어날 때까지 사용자는 갱신 전 걸음수를 보게 된다.
+     * 커밋 이후에 무효화하면 새 버전으로 처음 조회하는 시점에 이미 새 값이 보인다.
+     *
+     * <p>트랜잭션 밖에서 호출된 경우에는 미룰 곳이 없으므로 즉시 무효화한다.
+     */
+    private void invalidateCacheAfterCommit(String recordKey) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            summaryCache.invalidate(recordKey);
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                summaryCache.invalidate(recordKey);
+            }
+        });
     }
 }
