@@ -1,0 +1,25 @@
+# 테스트 환경. docker-compose 의 동일 컨테이너를 쓰되 스키마와 Redis DB 를 분리한다.
+# 개발 데이터가 남아 있으면 집계 정확도 테스트(골든값 비교)가 오염되기 때문이다.
+spring:
+  datasource:
+    url: ${TEST_MYSQL_URL:jdbc:mysql://localhost:3306/ocare_test?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&rewriteBatchedStatements=true}
+    username: ${TEST_MYSQL_USERNAME:root}
+    password: ${TEST_MYSQL_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  data:
+    redis:
+      host: ${TEST_REDIS_HOST:localhost}
+      port: ${TEST_REDIS_PORT:6379}
+      # 테스트 전용 DB index
+      database: 1
+
+  flyway:
+    # 테스트는 매 실행마다 스키마를 비우고 다시 쌓는다.
+    # 이전 실행이 남긴 데이터가 있으면 집계 골든값 비교가 틀린 결과로 실패하기 때문이다.
+    # 대상이 ocare_test 스키마로 한정되므로 개발 데이터에는 영향이 없다.
+    clean-disabled: false
+
+logging:
+  level:
+    org.hibernate.SQL: debug

@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: ocare
+
+  datasource:
+    # docker-compose 로 띄운 MySQL 을 사용한다.
+    # 접속 정보는 환경변수로 덮어쓸 수 있게 두어 실행 환경이 바뀌어도 파일 수정이 필요 없게 한다.
+    # rewriteBatchedStatements: 다건 INSERT 를 하나의 구문으로 합쳐 대량 수집 성능을 확보한다.
+    # allowPublicKeyRetrieval: MySQL 8 기본 인증(caching_sha2)을 비 SSL 로컬 연결에서 사용하기 위함.
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/ocare?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&rewriteBatchedStatements=true}
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      # database 0 = 애플리케이션용. 테스트는 1번을 사용해 데이터가 섞이지 않게 한다.
+      database: 0
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # 이미 테이블이 존재하는 DB 에 처음 적용될 때 기준선을 잡아 준다.
+    baseline-on-migrate: true
+    baseline-version: 0
+    # 적용 완료된 마이그레이션 파일이 나중에 수정되면 기동을 실패시킨다.
+    # 파일을 고쳐도 이미 반영된 DB 는 바뀌지 않는다.
+    validate-on-migrate: true
+    # 운영 데이터를 통째로 지우는 명령이므로 기본은 차단한다. 테스트 프로파일에서만 연다.
+    clean-disabled: true
+
+  jpa:
+    hibernate:
+      # 스키마의 소유권은 Flyway 마이그레이션에 있다.
+      # Hibernate 가 임의로 DDL 을 바꾸면 DECIMAL 정밀도나 UNIQUE 제약이 어긋날 수 있어 검증만 수행한다.
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          # 수집 데이터의 집계 기준일(measured_date)이 KST 기준이므로 JDBC 타임존을 고정한다.
+          # 이 값이 어긋나면 일별 집계 경계가 하루씩 밀린다.
+          time_zone: Asia/Seoul
+          # 1회 수집 페이로드가 최대 1,500여 건이므로 배치 INSERT 로 처리한다.
+          batch_size: 500
+        order_inserts: true
+        order_updates: true
+
+  jackson:
+    time-zone: Asia/Seoul
+    default-property-inclusion: non_null
+
+jwt:
+  secret: ${JWT_SECRET:ocare-local-development-secret-key-do-not-use-in-production}
+  # 액세스 토큰은 탈취 시 피해를 줄이기 위해 짧게 두고, 재발급으로 이어간다.
+  access-token-validity: 30m
+  refresh-token-validity: 14d
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
